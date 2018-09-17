@@ -96,7 +96,7 @@ Check out our [examples repository](https://github.com/elastic/azure-marketplace
   <tr><td>azureCloudPlugin</td><td>string</td>
     <td>Either <code>Yes</code> or <code>No</code> to install the Azure Cloud plugin for snapshot/restore. 
     When set to <code>Yes</code>, both <code>azureCloudeStorageAccountName</code> 
-    and <code>azureCloudStorageAccountKey</code> should be specified to configure the plugin correctly.
+    and <code>azureCloudStorageAccountKey</code> must be specified to configure the plugin correctly.
     </td><td><code>No</code></td></tr>
 
   <tr><td>azureCloudStorageAccountName</td><td>string</td>
@@ -110,7 +110,7 @@ Check out our [examples repository](https://github.com/elastic/azure-marketplace
 
   <tr><td>xpackPlugins</td><td>string</td>
     <td>Either <code>Yes</code> or <code>No</code> to install a trial license of the commercial <see href="https://www.elastic.co/products/x-pack">X-Pack</a>
-    plugins: Monitoring, Security, Alerting and Graph (Elasticsearch 2.3.0+).
+    plugins: Monitoring, Security, Alerting, Graph (Elasticsearch 2.3.0+) and Machine Learning (5.5.0+).
     </td><td><code>Yes</code></td></tr>
 
   <tr><td>esAdditionalPlugins</td><td>string</td>
@@ -121,16 +121,21 @@ Check out our [examples repository](https://github.com/elastic/azure-marketplace
     <td>Additional configuration for Elasticsearch yaml configuration file. Each line must be separated by a newline character <code>\n</code> e.g. <code>"action.auto_create_index: .security\nindices.queries.cache.size: 5%"</code>. <strong>This is an expert level feature - It is recommended that you run your additional yaml through a <a href="http://www.yamllint.com/">linter</a> before starting a deployment.</strong>
     </td><td><code>""</code></td></tr>
 
+  <tr><td>esHeapSize</td><td>integer</td>
+    <td>The size, in megabytes, of memory to allocate on each Elasticsearch node for the JVM heap. If unspecified, 50% of the available memory will be allocated to Elasticsearch heap, up to a maximum of 31744MB (~32GB). 
+    Take a look at <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html" target="_blank">the Elasticsearch documentation</a> for more information.  <strong>This is an expert level feature - setting a heap size larger than available memory on the Elasticsearch VM SKU will fail the deployment.</strong>
+    </td><td><code>0</code></td></tr>
+
   <tr><td>kibana</td><td>string</td>
     <td>Either <code>Yes</code> or <code>No</code> to provision a machine with a public IP that
     has Kibana installed on it. If you have opted to also install the Elasticsearch plugins using <code>xpackPlugins</code> then 
-    a trial license of the commercial <see href="https://www.elastic.co/products/x-pack">X-Pack</a> Kibana plugins as well as <a href="https://www.elastic.co/guide/en/sense/current/introduction.html">Sense Editor</a> are also installed.
+    a trial license of the commercial <see href="https://www.elastic.co/products/x-pack">X-Pack</a> Kibana plugins as well as <a href="https://www.elastic.co/guide/en/sense/current/introduction.html">Sense Editor (Kibana 4.x)</a> are also installed.
     </td><td><code>Yes</code></td></tr>
 
   <tr><td>vmSizeKibana</td><td>string</td>
     <td>Azure VM size of the Kibana instance. See <a href="https://github.com/elastic/azure-marketplace/blob/master/build/allowedValues.json">this list for supported sizes</a>.
     <strong>Check that the size you choose is <a href="https://azure.microsoft.com/en-au/regions/services/">available in the region you choose</a></strong>.
-    </td><td><code>Standard_A1</code></td></tr>
+    </td><td><code>Standard_A2</code></td></tr>
 
   <tr><td>kibanaCertBlob</td><td>string</td>
     <td>A Base-64 encoded form of the certificate (.crt) to secure HTTPS communication between the browser and Kibana.</td><td><code>""</code></td></tr>
@@ -142,12 +147,14 @@ Check out our [examples repository](https://github.com/elastic/azure-marketplace
     <td>The passphrase to decrypt the private key. Optional as the key may not be encrypted. Supported only in 5.3.0+</td><td><code>""</code></td></tr>
 
   <tr><td>jumpbox</td><td>string</td>
-    <td>Either <code>Yes</code> or <code>No</code> to optionally add a virtual machine to the deployment which you can use to connect and 
-    manage virtual machines on the internal network.
-    </td><td><code>No</code></td></tr>
+    <td>Either <code>Yes</code> or <code>No</code> to optionally add a virtual machine with a public IP to the deployment, which you can use to connect and manage virtual machines on the internal network.
+    <br /><br />
+    NOTE: If you are deploying Kibana, the Kibana virtual machine can act
+    as a jumpbox.
+  </td><td><code>No</code></td></tr>
 
   <tr><td>vmHostNamePrefix</td><td>string</td>
-    <td>The prefix to use for hostnames when naming virtual machines in the cluster. Hostnames are used for resolution of master nodes so if you are deploying a cluster into an existing virtual network containing an existing Elasticsearch cluster, be sure to set this to a unique prefix, to differentiate the hostnames of this cluster from an existing cluster. Can be up to 5 characters in length, must begin with an alphanumeric character and can contain alphanumeric and hyphen characters.
+    <td>The prefix to use for hostnames when naming virtual machines in the cluster. Hostnames are used for resolution of master nodes on the network, so if you are deploying a cluster into an existing virtual network containing an existing Elasticsearch cluster, be sure to set this to a unique prefix, to differentiate the hostnames of this cluster from an existing cluster. Can be up to 5 characters in length, must begin with an alphanumeric character and can contain alphanumeric and hyphen characters.
     </td><td><code>""</code></td></tr>
 
   <tr><td>vmSizeDataNodes</td><td>string</td>
@@ -171,7 +178,7 @@ Check out our [examples repository](https://github.com/elastic/azure-marketplace
     </td><td><code>40</code><br />i.e. the max supported disks for data node VM size</td></tr>
 
   <tr><td>vmDataDiskSize</td><td>string</td>
-    <td>The disk size of each attached disk. Choose <code>Large</code> (1024Gb), <code>Medium</code> (512Gb) or <code>Small</code> (128Gb).
+    <td>The disk size of each attached disk. Choose <code>Large</code> (1023Gb), <code>Medium</code> (512Gb) or <code>Small</code> (128Gb).
     For Premium Storage, disk sizes equate to <a href="https://docs.microsoft.com/en-us/azure/storage/storage-premium-storage#premium-storage-disks-limits">P30, P20 and P10</a> 
     storage disk types, respectively.
     </td>
@@ -223,8 +230,19 @@ Check out our [examples repository](https://github.com/elastic/azure-marketplace
     <td>When <code>authenticationType</code> is <code>sshPublicKey</code> this sets the OS level sshKey that can be used to login.
     </td><td><code>""</code></td></tr>
 
+  <tr><td>securityBootstrapPassword</td><td>securestring</td>
+    <td>Security password for 6.x <a href="https://www.elastic.co/guide/en/x-pack/current/setting-up-authentication.html#bootstrap-elastic-passwords"><code>bootstrap.password</code> key</a> that is added to the keystore. If no value is supplied, a 13 character password
+    will be generated using the ARM template <code>uniqueString()</code> function. The bootstrap password is used to seed the built-in
+    users. Used only in 6.0.0+
+    </td><td><code>""</code></td></tr>
+
   <tr><td>securityAdminPassword</td><td>securestring</td>
-    <td>The password for 5.x's superuser <code>elastic</code> or, in 2.x the <code>es_admin</code> user, with admin role.
+    <td>Security password Admin user.
+    <ul>
+    <li>for 5.x+, built-in <code>elastic</code> user</li>
+    <li>for 2.x, the <code>es_admin</code> user, with <code>admin</code> role</li>
+    </ul>
+    must be &gt; 6 characters
     </td><td><code>""</code></td></tr>
 
   <tr><td>securityReadPassword</td><td>securestring</td>
@@ -232,13 +250,24 @@ Check out our [examples repository](https://github.com/elastic/azure-marketplace
     </td><td><code>""</code></td></tr>
 
   <tr><td>securityKibanaPassword</td><td>securestring</td>
-    <td>Security password for the <code>es_kibana</code> user with kibana4 role, must be &gt; 6 characters
+    <td>Security password Kibana. 
+    <ul>
+    <li>for 5.x+, built-in <code>kibana</code> user</li>
+    <li>for 2.x, the <code>es_kibana</code> user with <code>kibana4_server role</code></li>
+    </ul>
+     must be &gt; 6 characters
+    </td><td><code>""</code></td></tr>
+
+  <tr><td>securityLogstashPassword</td><td>securestring</td>
+    <td>Security password for 5.2.0+ built-in <code>logstash_system</code> user. Only used in 5.2.0+.
+    <br />
+    must be &gt; 6 characters
     </td><td><code>""</code></td></tr>
 
   <tr><td>location</td><td>string</td>
-    <td>The location where to provision all the items in this template. Defaults to the special <code>ResourceGroup</code> value which means it will inherit the location
+    <td>The location where to provision all the items in this template. Defaults to the special <code>[resourceGroup().location]</code> value which means it will inherit the location
     from the resource group. Any other value must be a valid <a href="https://azure.microsoft.com/regions/">Azure region</a>.
-    </td><td><code>ResourceGroup</code></td></tr>
+    </td><td><code>[resourceGroup().location]</code></td></tr>
 
   <tr><td>vNetNewOrExisting</td><td>string</td>
     <td>Whether the Virtual Network is <code>new</code> or <code>existing</code>. An <code>existing</code> Virtual Network in
@@ -247,11 +276,12 @@ Check out our [examples repository](https://github.com/elastic/azure-marketplace
 
   <tr><td>vNetName</td><td>string</td>
     <td>The name of the Virtual Network.
+    <strong>The Virtual Network must already exist when using an <code>existing</code> Virtual Network</strong>
     </td><td><code>es-net</code></td></tr>
 
   <tr><td>vNetExistingResourceGroup</td><td>string</td>
     <td>The name of the Resource Group in which the Virtual Network resides when using an existing Virtual Network.
-    <strong>Required when using an existing Virtual Network</strong>
+    <strong>Required when using an <code>existing</code> Virtual Network</strong>
     </td><td><code>""</code></td></tr>
 
   <tr><td>vNetNewAddressPrefix</td><td>string</td>
@@ -265,56 +295,61 @@ Check out our [examples repository](https://github.com/elastic/azure-marketplace
 
   <tr><td>vNetClusterSubnetName</td><td>string</td>
     <td>The name of the subnet to which Elasticsearch nodes will be attached.
+    <strong>The subnet must already exist when using an <code>existing</code> Virtual Network</strong>
     </td><td><code>es-subnet</code></td></tr>
 
   <tr><td>vNetNewClusterSubnetAddressPrefix</td><td>string</td>
-    <td>The address space of the subnet. <strong>Required when creating a new Virtual Network</strong>
+    <td>The address space of the subnet. 
+    <strong>Required when creating a <code>new</code> Virtual Network</strong>
     </td><td><code>10.0.0.0/25</code></td></tr>
 
   <tr><td>vNetAppGatewaySubnetName</td><td>string</td>
-    <td>Subnet name to use for the Application Gateway. Required when selecting <code>gateway</code> for load balancing.
+    <td>Subnet name to use for the Application Gateway. 
+    <strong>Required when selecting <code>gateway</code> for load balancing.</strong><br />
+    <strong>The subnet must already exist when using an <code>existing</code> Virtual Network</strong>
     </td><td><code>es-gateway-subnet</code></td></tr>
 
   <tr><td>vNetNewAppGatewaySubnetAddressPrefix</td><td>string</td>
-    <td>The address space of the Application Gateway subnet. Required when creating a new Virtual Network and selecting <code>gateway</code> for load balancing.
+    <td>The address space of the Application Gateway subnet. 
+    <strong>Required when creating a <code>new</code> Virtual Network and selecting <code>gateway</code> for load balancing.</strong>
     </td><td><code>10.0.0.128/28</code></td></tr>
 
    <tr><td>appGatewayTier</td><td>string</td>
     <td>The tier of the Application Gateway, either <code>Standard</code> or <code>WAF</code>.
-    Required when selecting <code>gateway</code> for load balancing.
+    <strong>Required when selecting <code>gateway</code> for load balancing.</strong>
     </td><td><code>Standard</code></td></tr>   
 
    <tr><td>appGatewaySku</td><td>string</td>
     <td>The size of the Application Gateway. Choose <code>Small</code>, <code>Medium</code> or <code>Large</code>. 
     When choosing appGatewayTier <code>WAF</code>, the size must be at least <code>Medium</code>.
-    Required when selecting <code>gateway</code> for load balancing.
+    <strong>Required when selecting <code>gateway</code> for load balancing.</strong>
     </td><td><code>Medium</code></td></tr> 
 
    <tr><td>appGatewayCount</td><td>int</td>
     <td>The number instances of the Application Gateway. Can be a value between <code>1</code> and <code>10</code>.
     A minimum of <code>2</code> is recommended for production.
-    Required when selecting <code>gateway</code> for load balancing.
+    <strong>Required when selecting <code>gateway</code> for load balancing.</strong>
     </td><td><code>2</code></td></tr> 
 
    <tr><td>appGatewayCertBlob</td><td>string</td>
     <td>A Base-64 encoded form of the PFX certificate for the Application Gateway. 
     This certificate is used to secure HTTPS connections to and from the Application Gateway.
-    Required when selecting <code>gateway</code> for load balancing.
+    <strong>Required when selecting <code>gateway</code> for load balancing.</strong>
     </td><td><code>""</code></td></tr>   
 
    <tr><td>appGatewayCertPassword</td><td>securestring</td>
     <td>The password for the PFX certificate for the Application Gateway. Defaults to <code>""</code>.
-    Required when selecting <code>gateway</code> for load balancing.
+    <strong>Required when selecting <code>gateway</code> for load balancing.</strong>
     </td><td><code>""</code></td></tr> 
     
    <tr><td>appGatewayWafStatus</td><td>string</td>
     <td>The firewall status of the Application Gateway, either <code>Enabled</code> or <code>Disabled</code>.
-    Required when selecting <code>gateway</code> for load balancing and using appGatewayTier <code>WAF<code>.
+    <strong>Required when selecting <code>gateway</code> for load balancing and using appGatewayTier <code>WAF<code>.</strong>
     </td><td><code>Enabled</code></td></tr> 
 
    <tr><td>appGatewayWafMode</td><td>string</td>
     <td>The firewall mode of the Application Gateway, either <code>Detection</code> or <code>Prevention</code>.
-    Required when selecting <code>gateway</code> for load balancing and using appGatewayTier <code>WAF<code>.
+    <strong>Required when selecting <code>gateway</code> for load balancing and using appGatewayTier <code>WAF<code>.</strong>
     </td><td><code>Detection</code></td></tr>   
 
   <tr><td>userCompany</td><td>string</td>
@@ -370,7 +405,7 @@ You can deploy using the template directly from Github using the Azure CLI or Az
 4. Use our published template directly using `--template-uri`
 
 ```sh
-azure group deployment create --template-uri https://raw.githubusercontent.com/elastic/azure-marketplace/master/src/mainTemplate.json --parameters-file parameters/password.parameters.json -g name
+azure group deployment create --template-uri https://raw.githubusercontent.com/elastic/azure-marketplace/master/src/mainTemplate.json --parameters-file parameters/password.parameters.json -g <name>
 ```
 
 or if your are executing commands from a clone of this repo using `--template-file`
@@ -404,9 +439,8 @@ The `--parameters-file` can specify a different location for the items that get 
   ```powershell
   $clusterParameters = @{
       "artifactsBaseUrl"="https://raw.githubusercontent.com/elastic/azure-marketplace/master/src"
-      "esVersion" = "5.1.2"
+      "esVersion" = "6.2.1"
       "esClusterName" = "elasticsearch"
-      "location" = "ResourceGroup"
       "loadBalancerType" = "internal"
       "vmDataDiskCount" = 1
       "adminUsername" = "russ"
@@ -414,6 +448,7 @@ The `--parameters-file` can specify a different location for the items that get 
       "securityAdminPassword" = "Password123"
       "securityReadPassword" = "Password123"
       "securityKibanaPassword" = "Password123"
+      "securityLogstashPassword" = "Password123"
   }
   ```
 
@@ -447,11 +482,14 @@ $clusterParameters = @{
     "securityAdminPassword" = "Password123"
     "securityReadPassword" = "Password123"
     "securityKibanaPassword" = "Password123"
+    "securityLogstashPassword" = "Password123"
 }
 
 New-AzureRmResourceGroup -Name "<name>" -Location "<location>"
 New-AzureRmResourceGroupDeployment -Name "<deployment name>" -ResourceGroupName "<name>" -TemplateUri "$templateBaseUrl/mainTemplate.json" -TemplateParameterObject $clusterParameters
 ```
+
+Targeting a specific template version is recommended for repeatable deployments.
 
 ### Web based deploy
 
